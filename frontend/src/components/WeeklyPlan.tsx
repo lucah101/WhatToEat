@@ -173,8 +173,8 @@ export function WeeklyPlan() {
 
   if (!plan || loading) {
     return (
-      <div className="h-[calc(100vh-73px)] flex items-center justify-center">
-        <p className="text-gray-500 text-sm">
+      <div className="weekly-root weekly-root--loading">
+        <p className="weekly-loading-text">
           {loading ? "Loading weekly plan..." : "No plan yet."}
         </p>
       </div>
@@ -183,7 +183,7 @@ export function WeeklyPlan() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="h-[calc(100vh-73px)] flex bg-gray-50">
+      <div className="weekly-root">
         <FoodList foods={foods} />
         <PlanGrid
           plan={plan}
@@ -194,11 +194,7 @@ export function WeeklyPlan() {
           onRemoveFood={removeFood}
         />
       </div>
-      {saving && (
-        <div className="absolute bottom-4 right-4 text-xs text-gray-500 bg-white/80 px-3 py-1 rounded shadow">
-          Saving...
-        </div>
-      )}
+      {saving && <div className="weekly-saving">Saving...</div>}
     </DndProvider>
   );
 }
