@@ -1,18 +1,10 @@
-@import "./theme.css";
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  body {
-    margin: 0;
-    min-width: 320px;
-    min-height: 100vh;
-  }
-
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
+a {
+  text-decoration: none;
+  color: inherit;
 }

@@ -6,39 +6,39 @@ export function App() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="bg-card shadow-sm border-b border-border">
-        <div className="max-w-[1800px] mx-auto px-6 py-4">
-          <div className="flex items-center gap-8">
-            <h1 className="font-bold text-2xl text-foreground">WhatToEat</h1>
-            <div className="flex gap-3">
+    <div className="app-root">
+      <nav className="app-nav">
+        <div className="app-nav-inner">
+          <div className="app-nav-left">
+            <h1 className="app-brand">WhatToEat</h1>
+            <div className="app-nav-tabs">
               <Link
                 to="/"
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all ${
+                className={`nav-tab ${
                   location.pathname === "/"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted"
+                    ? "nav-tab--active"
+                    : ""
                 }`}
               >
-                <Database className="w-4 h-4" />
+                <Database className="nav-tab__icon" />
                 Food Database
               </Link>
               <Link
                 to="/weekly-plan"
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all ${
+                className={`nav-tab ${
                   location.pathname === "/weekly-plan"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted"
+                    ? "nav-tab--active"
+                    : ""
                 }`}
               >
-                <CalendarDays className="w-4 h-4" />
+                <CalendarDays className="nav-tab__icon" />
                 Weekly Plan
               </Link>
             </div>
           </div>
         </div>
       </nav>
-      <main>
+      <main className="app-main">
         <Outlet />
       </main>
     </div>

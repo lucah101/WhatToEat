@@ -108,47 +108,31 @@ export function FoodDatabase() {
   };
 
   return (
-    <div className="max-w-[1800px] mx-auto px-6 py-8">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-foreground mb-2">
-          Food Database
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Manage your food categories and options
-        </p>
+    <div className="page-container">
+      <div className="page-header">
+        <h2 className="page-title">Food Database</h2>
+        <p className="page-subtitle">Manage your food categories and options</p>
         {(loading || saving) && (
-          <p className="mt-2 text-xs text-muted-foreground">
-            Syncing with server...
-          </p>
+          <p className="page-status">Syncing with server...</p>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="food-grid">
         {CATEGORIES.map((category) => {
           const categoryFoods = foods.filter((f) => f.category === category);
 
           return (
-            <div
-              key={category}
-              className="bg-card rounded-lg shadow-sm border border-border p-6"
-            >
-              <div className="font-bold text-lg mb-4 text-card-foreground pb-2 border-b border-border">
-                {category}
-              </div>
+            <div key={category} className="food-card">
+              <div className="food-card__title">{category}</div>
 
-              {/* Food list */}
-              <div className="space-y-2 mb-4 max-h-[400px] overflow-y-auto">
+              <div className="food-card__list">
                 {categoryFoods.map((food) => (
-                  <div
-                    key={food.id}
-                    className="flex items-center gap-2 p-3 bg-muted rounded-lg border border-border hover:border-muted-foreground/30 transition-all"
-                  >
+                  <div key={food.id} className="food-row">
                     {editingId === food.id ? (
                       <>
                         <Input
                           value={editingName}
                           onChange={(e) => setEditingName(e.target.value)}
-                          className="flex-1 h-9 text-sm"
                           autoFocus
                           onKeyDown={(e) => {
                             if (e.key === "Enter") void saveEdit();
@@ -156,42 +140,40 @@ export function FoodDatabase() {
                           }}
                         />
                         <Button
+                          onClick={saveEdit}
                           size="sm"
                           variant="ghost"
-                          onClick={saveEdit}
-                          className="h-8 w-8 p-0"
+                          className="icon-button"
                         >
-                          <Check className="w-4 h-4 text-gray-900" />
+                          <Check className="icon-button__icon" />
                         </Button>
                         <Button
+                          onClick={cancelEdit}
                           size="sm"
                           variant="ghost"
-                          onClick={cancelEdit}
-                          className="h-8 w-8 p-0"
+                          className="icon-button icon-button--muted"
                         >
-                          <X className="w-4 h-4 text-gray-600" />
+                          <X className="icon-button__icon" />
                         </Button>
                       </>
                     ) : (
                       <>
-                        <span className="flex-1 text-sm font-medium text-foreground truncate">
-                          {food.name}
-                        </span>
+                        <span className="food-row__name">{food.name}</span>
                         <Button
+                          onClick={() => startEdit(food)}
                           size="sm"
                           variant="ghost"
-                          onClick={() => startEdit(food)}
-                          className="h-9 w-9 p-0 text-muted-foreground hover:text-foreground"
+                          className="icon-button icon-button--muted"
                         >
-                          <Edit2 className="w-4 h-4 text-gray-600" />
+                          <Edit2 className="icon-button__icon" />
                         </Button>
                         <Button
+                          onClick={() => void deleteFood(food.id)}
                           size="sm"
                           variant="ghost"
-                          onClick={() => void deleteFood(food.id)}
-                          className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive"
+                          className="icon-button icon-button--danger"
                         >
-                          <Trash2 className="w-4 h-4 text-gray-600" />
+                          <Trash2 className="icon-button__icon" />
                         </Button>
                       </>
                     )}
@@ -199,8 +181,7 @@ export function FoodDatabase() {
                 ))}
               </div>
 
-              {/* Add new food */}
-              <div className="flex gap-2">
+              <div className="food-card__add">
                 <Input
                   placeholder="Add new food..."
                   value={newFoodNames[category]}
@@ -213,14 +194,13 @@ export function FoodDatabase() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void addFood(category);
                   }}
-                  className="flex-1 h-9 text-sm"
                 />
                 <Button
-                  onClick={() => void addFood(category)}
                   size="sm"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  onClick={() => void addFood(category)}
+                  className="add-button"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="add-button__icon" />
                 </Button>
               </div>
             </div>

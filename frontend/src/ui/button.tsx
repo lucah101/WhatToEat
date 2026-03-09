@@ -7,15 +7,14 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className = "", variant = "default", size = "default", ...props }, ref) => {
-    const base =
-      "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+    const base = "wt-button";
     const variants: Record<string, string> = {
-      default: "bg-blue-500 text-white hover:bg-blue-600 focus-visible:ring-blue-500",
-      ghost: "bg-transparent hover:bg-gray-100 text-gray-700 focus-visible:ring-gray-300",
+      default: "wt-button--default",
+      ghost: "wt-button--ghost",
     };
     const sizes: Record<string, string> = {
-      default: "h-9 px-4 text-sm",
-      sm: "h-7 px-2 text-xs",
+      default: "wt-button--default-size",
+      sm: "wt-button--sm",
     };
 
     return (
