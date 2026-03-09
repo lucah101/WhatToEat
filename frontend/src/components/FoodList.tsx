@@ -6,11 +6,7 @@ interface FoodListProps {
   foods: FoodItem[];
 }
 
-interface DraggableFoodProps {
-  food: FoodItem;
-}
-
-function DraggableFood({ food }: DraggableFoodProps) {
+function DraggableFood({ food }: { food: FoodItem }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "FOOD",
     item: food,

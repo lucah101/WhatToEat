@@ -110,15 +110,18 @@ export function FoodDatabase() {
   return (
     <div className="max-w-[1800px] mx-auto px-6 py-8">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Food Database</h2>
-        <p className="text-gray-500">
-          Manage your food categories and options (stored in PostgreSQL)
+        <h2 className="text-3xl font-bold text-foreground mb-2">
+          Food Database
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Manage your food categories and options
         </p>
+        {(loading || saving) && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Syncing with server...
+          </p>
+        )}
       </div>
-
-      {(loading || saving) && (
-        <p className="text-sm text-gray-500 mb-4">Syncing with server...</p>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {CATEGORIES.map((category) => {
@@ -127,24 +130,25 @@ export function FoodDatabase() {
           return (
             <div
               key={category}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+              className="bg-card rounded-lg shadow-sm border border-border p-6"
             >
-              <div className="font-bold text-lg mb-4 text-gray-900 pb-2 border-b border-gray-200">
+              <div className="font-bold text-lg mb-4 text-card-foreground pb-2 border-b border-border">
                 {category}
               </div>
 
+              {/* Food list */}
               <div className="space-y-2 mb-4 max-h-[400px] overflow-y-auto">
                 {categoryFoods.map((food) => (
                   <div
                     key={food.id}
-                    className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-all"
+                    className="flex items-center gap-2 p-3 bg-muted rounded-lg border border-border hover:border-muted-foreground/30 transition-all"
                   >
                     {editingId === food.id ? (
                       <>
                         <Input
                           value={editingName}
                           onChange={(e) => setEditingName(e.target.value)}
-                          className="flex-1 h-9"
+                          className="flex-1 h-9 text-sm"
                           autoFocus
                           onKeyDown={(e) => {
                             if (e.key === "Enter") void saveEdit();
@@ -155,7 +159,7 @@ export function FoodDatabase() {
                           size="sm"
                           variant="ghost"
                           onClick={saveEdit}
-                          className="h-9 w-9 p-0"
+                          className="h-8 w-8 p-0"
                         >
                           <Check className="w-4 h-4 text-gray-900" />
                         </Button>
@@ -163,21 +167,21 @@ export function FoodDatabase() {
                           size="sm"
                           variant="ghost"
                           onClick={cancelEdit}
-                          className="h-9 w-9 p-0"
+                          className="h-8 w-8 p-0"
                         >
                           <X className="w-4 h-4 text-gray-600" />
                         </Button>
                       </>
                     ) : (
                       <>
-                        <span className="flex-1 text-sm font-medium text-gray-700">
+                        <span className="flex-1 text-sm font-medium text-foreground truncate">
                           {food.name}
                         </span>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => startEdit(food)}
-                          className="h-9 w-9 p-0"
+                          className="h-9 w-9 p-0 text-muted-foreground hover:text-foreground"
                         >
                           <Edit2 className="w-4 h-4 text-gray-600" />
                         </Button>
@@ -185,7 +189,7 @@ export function FoodDatabase() {
                           size="sm"
                           variant="ghost"
                           onClick={() => void deleteFood(food.id)}
-                          className="h-9 w-9 p-0"
+                          className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive"
                         >
                           <Trash2 className="w-4 h-4 text-gray-600" />
                         </Button>
@@ -195,6 +199,7 @@ export function FoodDatabase() {
                 ))}
               </div>
 
+              {/* Add new food */}
               <div className="flex gap-2">
                 <Input
                   placeholder="Add new food..."
@@ -208,12 +213,12 @@ export function FoodDatabase() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void addFood(category);
                   }}
-                  className="flex-1"
+                  className="flex-1 h-9 text-sm"
                 />
                 <Button
                   onClick={() => void addFood(category)}
                   size="sm"
-                  className="bg-blue-500 hover:bg-blue-600"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
