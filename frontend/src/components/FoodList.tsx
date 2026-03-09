@@ -1,8 +1,16 @@
 import { useDrag } from "react-dnd";
 import { GripVertical } from "lucide-react";
-import { FoodItem } from "../FoodDatabase";
+import type { FoodItem } from "./FoodDatabase";
 
-function DraggableFood({ food }) {
+interface FoodListProps {
+  foods: FoodItem[];
+}
+
+interface DraggableFoodProps {
+  food: FoodItem;
+}
+
+function DraggableFood({ food }: DraggableFoodProps) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "FOOD",
     item: food,
@@ -24,7 +32,7 @@ function DraggableFood({ food }) {
   );
 }
 
-export function FoodList({ foods }) {
+export function FoodList({ foods }: FoodListProps) {
   const categories = ["Carbs", "Protein", "Vegetables"];
 
   return (

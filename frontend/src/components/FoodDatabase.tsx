@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Edit2, Check, X } from "lucide-react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 export type FoodCategory = "Carbs" | "Protein" | "Vegetables" | "Soup";
 
@@ -12,6 +12,7 @@ export interface FoodItem {
 }
 
 const CATEGORIES: FoodCategory[] = ["Carbs", "Protein", "Vegetables", "Soup"];
+const API_BASE = "http://localhost:5234";
 
 export function FoodDatabase() {
   const [foods, setFoods] = useState<FoodItem[]>([]);
@@ -29,7 +30,7 @@ export function FoodDatabase() {
   const fetchFoods = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/foods");
+      const res = await fetch(`${API_BASE}/api/foods`);
       if (!res.ok) throw new Error("Failed to load foods");
       const data: FoodItem[] = await res.json();
       setFoods(data);
@@ -48,7 +49,7 @@ export function FoodDatabase() {
 
     setSaving(true);
     try {
-      const res = await fetch("http://localhost:5000/api/foods", {
+      const res = await fetch(`${API_BASE}/api/foods`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, category }),
@@ -64,7 +65,7 @@ export function FoodDatabase() {
   const deleteFood = async (id: number) => {
     setSaving(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/foods/${id}`, {
+      const res = await fetch(`${API_BASE}/api/foods/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete food");
@@ -87,7 +88,7 @@ export function FoodDatabase() {
 
     setSaving(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/foods/${editingId}`, {
+      const res = await fetch(`${API_BASE}/api/foods/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: editingName, category: food.category }),

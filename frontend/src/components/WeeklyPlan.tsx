@@ -3,8 +3,32 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { FoodList } from "./FoodList";
 import { PlanGrid } from "./PlanGrid";
+import type { FoodItem } from "./FoodDatabase";
 
-const WEEK_DAYS = [
+export interface MealFood {
+  foodId: number;
+  foodName: string;
+  category: "Carbs" | "Protein" | "Vegetables";
+  grams: number;
+}
+
+export interface MealCell {
+  foods: MealFood[];
+}
+
+export type WeekDay =
+  | "Monday"
+  | "Tuesday"
+  | "Wednesday"
+  | "Thursday"
+  | "Friday"
+  | "Saturday"
+  | "Sunday";
+export type MealTime = "Breakfast" | "Lunch" | "Dinner";
+
+export type WeeklyPlanData = Record<WeekDay, Record<MealTime, MealCell>>;
+
+const WEEK_DAYS: WeekDay[] = [
   "Monday",
   "Tuesday",
   "Wednesday",
@@ -13,71 +37,149 @@ const WEEK_DAYS = [
   "Saturday",
   "Sunday",
 ];
+const MEAL_TIMES: MealTime[] = ["Breakfast", "Lunch", "Dinner"];
 
-const MEAL_TIMES = ["Breakfast", "Lunch", "Dinner"];
-
-const PLAN_STORAGE_KEY = "weekly-plan";
-const FOOD_STORAGE_KEY = "food-database";
+const API_BASE = "http://localhost:5234";
 
 export function WeeklyPlan() {
-  const [foods, setFoods] = useState([]);
-  const [plan, setPlan] = useState(() => {
-    const stored = localStorage.getItem(PLAN_STORAGE_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
+  const [foods, setFoods] = useState<FoodItem[]>([]);
+  const [plan, setPlan] = useState<WeeklyPlanData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-    const initialPlan = {};
+  const buildEmptyPlan = (): WeeklyPlanData => {
+    const initialPlan: WeeklyPlanData = {} as WeeklyPlanData;
     WEEK_DAYS.forEach((day) => {
-      initialPlan[day] = {};
+      initialPlan[day] = {} as Record<MealTime, MealCell>;
       MEAL_TIMES.forEach((meal) => {
         initialPlan[day][meal] = { foods: [] };
       });
     });
     return initialPlan;
-  });
+  };
+
+  const fetchFoods = async () => {
+    const res = await fetch(`${API_BASE}/api/foods`);
+    if (!res.ok) throw new Error("Failed to load foods");
+    const data: FoodItem[] = await res.json();
+    setFoods(data);
+  };
+
+  const fetchPlan = async () => {
+    const res = await fetch(`${API_BASE}/api/weekly-plan`);
+    if (!res.ok) {
+      setPlan(buildEmptyPlan());
+      return;
+    }
+    const data: {
+      plan: Record<string, Record<string, MealFood[]>>;
+    } = await res.json();
+
+    const empty = buildEmptyPlan();
+    for (const day of WEEK_DAYS) {
+      const dayData = data.plan?.[day] ?? {};
+      for (const meal of MEAL_TIMES) {
+        const foodsForMeal = (dayData[meal] ?? []) as MealFood[];
+        empty[day][meal] = { foods: foodsForMeal };
+      }
+    }
+    setPlan(empty);
+  };
+
+  const syncFromServer = async () => {
+    setLoading(true);
+    try {
+      await Promise.all([fetchFoods(), fetchPlan()]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const stored = localStorage.getItem(FOOD_STORAGE_KEY);
-    if (stored) {
-      setFoods(JSON.parse(stored));
-    }
+    void syncFromServer();
   }, []);
 
-  const savePlan = (newPlan) => {
-    setPlan(newPlan);
-    localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(newPlan));
-  };
-
-  const addFoodToCell = (day, meal, food, grams = 100) => {
-    const newPlan = { ...plan };
-    const cell = newPlan[day][meal];
-
-    if (food.category !== "Soup") {
-      const mealFood = {
-        foodId: food.id,
-        foodName: food.name,
-        category: food.category,
-        grams,
+  const persistPlan = async (newPlan: WeeklyPlanData) => {
+    setSaving(true);
+    try {
+      const payload = {
+        plan: Object.fromEntries(
+          WEEK_DAYS.map((day) => [
+            day,
+            Object.fromEntries(
+              MEAL_TIMES.map((meal) => [meal, newPlan[day][meal].foods])
+            ),
+          ])
+        ),
       };
-      cell.foods = [...cell.foods, mealFood];
-      savePlan(newPlan);
+
+      await fetch(`${API_BASE}/api/weekly-plan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const updateFoodGrams = (day, meal, foodIndex, grams) => {
-    const newPlan = { ...plan };
+  const savePlan = (newPlan: WeeklyPlanData) => {
+    setPlan(newPlan);
+    void persistPlan(newPlan);
+  };
+
+  const addFoodToCell = (
+    day: WeekDay,
+    meal: MealTime,
+    food: FoodItem,
+    grams: number = 100
+  ) => {
+    if (food.category === "Soup") return;
+
+    const current = plan ?? buildEmptyPlan();
+    const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(current));
+    const cell = newPlan[day][meal];
+
+    const mealFood: MealFood = {
+      foodId: food.id,
+      foodName: food.name,
+      category: food.category as "Carbs" | "Protein" | "Vegetables",
+      grams,
+    };
+    cell.foods = [...cell.foods, mealFood];
+    savePlan(newPlan);
+  };
+
+  const updateFoodGrams = (
+    day: WeekDay,
+    meal: MealTime,
+    foodIndex: number,
+    grams: number
+  ) => {
+    if (!plan) return;
+    const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(plan));
     newPlan[day][meal].foods[foodIndex].grams = grams;
     savePlan(newPlan);
   };
 
-  const removeFood = (day, meal, foodIndex) => {
-    const newPlan = { ...plan };
+  const removeFood = (day: WeekDay, meal: MealTime, foodIndex: number) => {
+    if (!plan) return;
+    const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(plan));
     newPlan[day][meal].foods = newPlan[day][meal].foods.filter(
       (_, idx) => idx !== foodIndex
     );
     savePlan(newPlan);
   };
+
+  if (!plan || loading) {
+    return (
+      <div className="h-[calc(100vh-73px)] flex items-center justify-center">
+        <p className="text-gray-500 text-sm">
+          {loading ? "Loading weekly plan..." : "No plan yet."}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -92,6 +194,12 @@ export function WeeklyPlan() {
           onRemoveFood={removeFood}
         />
       </div>
+      {saving && (
+        <div className="absolute bottom-4 right-4 text-xs text-gray-500 bg-white/80 px-3 py-1 rounded shadow">
+          Saving...
+        </div>
+      )}
     </DndProvider>
   );
 }
+
