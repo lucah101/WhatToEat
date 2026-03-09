@@ -1,9 +1,48 @@
+import { useRef } from "react";
 import { useDrop } from "react-dnd";
 import { X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import type { FoodItem } from "./FoodDatabase";
+import type {
+  WeekDay,
+  MealTime,
+  WeeklyPlanData,
+  MealFood,
+} from "./WeeklyPlan";
 
-function MealCellContent({ day, meal, foods, onUpdateGrams, onRemoveFood }) {
+interface PlanGridProps {
+  plan: WeeklyPlanData;
+  weekDays: WeekDay[];
+  mealTimes: MealTime[];
+  onAddFood: (
+    day: WeekDay,
+    meal: MealTime,
+    food: FoodItem,
+    grams: number
+  ) => void;
+  onUpdateGrams: (
+    day: WeekDay,
+    meal: MealTime,
+    foodIndex: number,
+    grams: number
+  ) => void;
+  onRemoveFood: (day: WeekDay, meal: MealTime, foodIndex: number) => void;
+}
+
+function MealCellContent({
+  day: _day,
+  meal: _meal,
+  foods,
+  onUpdateGrams,
+  onRemoveFood,
+}: {
+  day: WeekDay;
+  meal: MealTime;
+  foods: MealFood[];
+  onUpdateGrams: (foodIndex: number, grams: number) => void;
+  onRemoveFood: (foodIndex: number) => void;
+}) {
   const carbFoods = foods.filter((f) => f.category === "Carbs");
   const proteinFoods = foods.filter((f) => f.category === "Protein");
   const vegFoods = foods.filter((f) => f.category === "Vegetables");
@@ -12,7 +51,7 @@ function MealCellContent({ day, meal, foods, onUpdateGrams, onRemoveFood }) {
   const totalProtein = proteinFoods.reduce((sum, f) => sum + f.grams, 0);
   const totalVeg = vegFoods.reduce((sum, f) => sum + f.grams, 0);
 
-  const renderFoodGroup = (groupFoods, title) => {
+  const renderFoodGroup = (groupFoods: MealFood[], title: string) => {
     if (groupFoods.length === 0) return null;
 
     return (
@@ -97,10 +136,17 @@ function DroppableCell({
   onAddFood,
   onUpdateGrams,
   onRemoveFood,
+}: {
+  day: WeekDay;
+  meal: MealTime;
+  foods: MealFood[];
+  onAddFood: (food: FoodItem) => void;
+  onUpdateGrams: (foodIndex: number, grams: number) => void;
+  onRemoveFood: (foodIndex: number) => void;
 }) {
   const [{ isOver, canDrop }, drop] = useDrop(() => ({
     accept: "FOOD",
-    drop: (item) => {
+    drop: (item: FoodItem) => {
       onAddFood(item);
     },
     collect: (monitor) => ({
@@ -109,9 +155,12 @@ function DroppableCell({
     }),
   }));
 
+  const ref = useRef<HTMLDivElement | null>(null);
+  drop(ref);
+
   return (
     <div
-      ref={drop}
+      ref={ref}
       className={`h-full min-h-[140px] p-3 rounded-lg transition-all ${
         isOver && canDrop
           ? "border-2 border-blue-400 bg-blue-50"
@@ -144,7 +193,7 @@ export function PlanGrid({
   onAddFood,
   onUpdateGrams,
   onRemoveFood,
-}) {
+}: PlanGridProps) {
   return (
     <div className="flex-1 overflow-auto bg-gray-50">
       <div className="p-6">

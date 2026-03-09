@@ -1,6 +1,4 @@
+/* Global overrides kept minimal – main design tokens live in theme.css */
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Helvetica Neue", Arial, sans-serif;
-  background-color: #f9fafb;
 }

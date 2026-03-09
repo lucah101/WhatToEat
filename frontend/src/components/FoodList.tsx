@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useDrag } from "react-dnd";
 import { GripVertical } from "lucide-react";
 import type { FoodItem } from "./FoodDatabase";
@@ -15,9 +16,12 @@ function DraggableFood({ food }: { food: FoodItem }) {
     }),
   }));
 
+  const ref = useRef<HTMLDivElement | null>(null);
+  drag(ref);
+
   return (
     <div
-      ref={drag}
+      ref={ref}
       className={`flex items-center gap-2 px-3 py-2.5 bg-white border border-gray-200 rounded-lg cursor-move transition-all hover:border-gray-300 hover:shadow-sm ${
         isDragging ? "opacity-50" : "opacity-100"
       }`}
