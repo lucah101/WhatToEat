@@ -66,7 +66,6 @@ body {
 .nav-tab--active {
   background-color: #2563eb;
   color: #ffffff;
-  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
 }
 
 .nav-tab__icon {
@@ -305,6 +304,14 @@ body {
   position: relative;
 }
 
+.weekly-root--sidebar-collapsed .weekly-sidebar {
+  width: 20px;
+}
+
+.weekly-root--sidebar-collapsed .weekly-main {
+  padding-left: 24px;
+}
+
 .weekly-root--loading {
   align-items: center;
   justify-content: center;
@@ -337,6 +344,14 @@ body {
   flex-direction: column;
 }
 
+.weekly-sidebar--collapsed {
+  cursor: pointer;
+}
+
+.weekly-sidebar--collapsed:focus {
+  outline: none;
+}
+
 .weekly-sidebar-header {
   position: sticky;
   top: 0;
@@ -344,6 +359,21 @@ body {
   padding: 18px 20px 14px;
   background-color: #ffffff;
   border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.weekly-root--sidebar-collapsed .weekly-sidebar-header {
+  padding: 8px 2px;
+  justify-content: center;
+}
+
+.weekly-sidebar-header-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .weekly-sidebar-title {
@@ -357,6 +387,18 @@ body {
   margin: 4px 0 0;
   font-size: 12px;
   color: #9ca3af;
+}
+
+.weekly-sidebar-toggle {
+  font-size: 11px;
+  padding-inline: 10px;
+  height: 26px;
+  white-space: nowrap;
+}
+
+.weekly-root--sidebar-collapsed .weekly-sidebar-toggle {
+  padding-inline: 0;
+  width: 100%;
 }
 
 .weekly-sidebar-body {
@@ -461,7 +503,7 @@ body {
   position: sticky;
   left: 0;
   z-index: 3;
-  width: 90px;
+  width: 70px;
 }
 
 .weekly-table-day-header:last-child {

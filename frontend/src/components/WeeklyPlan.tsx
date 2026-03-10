@@ -46,6 +46,7 @@ export function WeeklyPlan() {
   const [plan, setPlan] = useState<WeeklyPlanData | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const buildEmptyPlan = (): WeeklyPlanData => {
     const initialPlan: WeeklyPlanData = {} as WeeklyPlanData;
@@ -123,31 +124,30 @@ export function WeeklyPlan() {
     }
   };
 
-  const savePlan = (newPlan: WeeklyPlanData) => {
-    setPlan(newPlan);
-    void persistPlan(newPlan);
-  };
-
   const addFoodToCell = (
     day: WeekDay,
     meal: MealTime,
     food: FoodItem,
-    grams: number = 100
+    grams: number = 0
   ) => {
     if (food.category === "Soup") return;
 
-    const current = plan ?? buildEmptyPlan();
-    const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(current));
-    const cell = newPlan[day][meal];
+    setPlan((prev) => {
+      const current = prev ?? buildEmptyPlan();
+      const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(current));
+      const cell = newPlan[day][meal];
 
-    const mealFood: MealFood = {
-      foodId: food.id,
-      foodName: food.name,
-      category: food.category as "Carbs" | "Protein" | "Vegetables",
-      grams,
-    };
-    cell.foods = [...cell.foods, mealFood];
-    savePlan(newPlan);
+      const mealFood: MealFood = {
+        foodId: food.id,
+        foodName: food.name,
+        category: food.category as "Carbs" | "Protein" | "Vegetables",
+        grams,
+      };
+      cell.foods = [...cell.foods, mealFood];
+
+      void persistPlan(newPlan);
+      return newPlan;
+    });
   };
 
   const updateFoodGrams = (
@@ -156,19 +156,25 @@ export function WeeklyPlan() {
     foodIndex: number,
     grams: number
   ) => {
-    if (!plan) return;
-    const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(plan));
-    newPlan[day][meal].foods[foodIndex].grams = grams;
-    savePlan(newPlan);
+    setPlan((prev) => {
+      if (!prev) return prev;
+      const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(prev));
+      newPlan[day][meal].foods[foodIndex].grams = grams;
+      void persistPlan(newPlan);
+      return newPlan;
+    });
   };
 
   const removeFood = (day: WeekDay, meal: MealTime, foodIndex: number) => {
-    if (!plan) return;
-    const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(plan));
-    newPlan[day][meal].foods = newPlan[day][meal].foods.filter(
-      (_, idx) => idx !== foodIndex
-    );
-    savePlan(newPlan);
+    setPlan((prev) => {
+      if (!prev) return prev;
+      const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(prev));
+      newPlan[day][meal].foods = newPlan[day][meal].foods.filter(
+        (_, idx) => idx !== foodIndex
+      );
+      void persistPlan(newPlan);
+      return newPlan;
+    });
   };
 
   if (!plan || loading) {
@@ -183,8 +189,18 @@ export function WeeklyPlan() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="weekly-root">
-        <FoodList foods={foods} />
+      <div
+        className={
+          sidebarCollapsed
+            ? "weekly-root weekly-root--sidebar-collapsed"
+            : "weekly-root"
+        }
+      >
+        <FoodList
+          foods={foods}
+          isCollapsed={sidebarCollapsed}
+          onToggleSidebar={() => setSidebarCollapsed((prev) => !prev)}
+        />
         <PlanGrid
           plan={plan}
           weekDays={WEEK_DAYS}
