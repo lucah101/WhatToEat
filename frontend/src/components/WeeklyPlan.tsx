@@ -8,7 +8,7 @@ import type { FoodItem, FoodUnit } from "./FoodDatabase";
 export interface MealFood {
   foodId: number;
   foodName: string;
-  category: "Carbs" | "Protein" | "Vegetables";
+  category: "Carbs" | "Protein" | "Vegetables" | "Soup";
   amount: number;
   unit: FoodUnit;
 }
@@ -132,8 +132,6 @@ export function WeeklyPlan() {
     amount: number = food.defaultAmount ?? 0,
     unit: FoodUnit = food.defaultUnit ?? "g"
   ) => {
-    if (food.category === "Soup") return;
-
     setPlan((prev) => {
       const current = prev ?? buildEmptyPlan();
       const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(current));
@@ -142,7 +140,7 @@ export function WeeklyPlan() {
       const mealFood: MealFood = {
         foodId: food.id,
         foodName: food.name,
-        category: food.category as "Carbs" | "Protein" | "Vegetables",
+        category: food.category as "Carbs" | "Protein" | "Vegetables" | "Soup",
         amount,
         unit,
       };

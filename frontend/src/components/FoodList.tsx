@@ -34,7 +34,7 @@ function DraggableFood({ food }: { food: FoodItem }) {
 }
 
 export function FoodList({ foods, isCollapsed, onToggleSidebar }: FoodListProps) {
-  const categories = ["Carbs", "Protein", "Vegetables"];
+  const categories = ["Carbs", "Protein", "Vegetables", "Soup"];
 
   return (
     <div

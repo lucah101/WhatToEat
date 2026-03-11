@@ -178,7 +178,7 @@ export function FoodDatabase() {
           <thead>
             <tr>
               <th className="food-table__th food-table__th--name">Food</th>
-              <th className="food-table__th food-table__th--amount">Default</th>
+              <th className="food-table__th food-table__th--amount">Weight</th>
               <th className="food-table__th food-table__th--notes">Notes</th>
               <th className="food-table__th food-table__th--actions">Actions</th>
             </tr>

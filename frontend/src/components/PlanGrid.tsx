@@ -83,6 +83,10 @@ function MealCellContent({
         foods.filter((f) => f.category === "Vegetables"),
         "Vegetables"
       )}
+      {renderFoodGroup(
+        foods.filter((f) => f.category === "Soup"),
+        "Soup"
+      )}
     </div>
   );
 }
