@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useDrop } from "react-dnd";
 import { X } from "lucide-react";
 import { Button } from "../ui/button";
-import type { FoodItem } from "./FoodDatabase";
+import type { FoodItem, FoodUnit } from "./FoodDatabase";
 import type {
   WeekDay,
   MealTime,
@@ -18,7 +18,14 @@ interface PlanGridProps {
     day: WeekDay,
     meal: MealTime,
     food: FoodItem,
-    grams: number
+    amount?: number,
+    unit?: FoodUnit
+  ) => void;
+  onUpdateAmount: (
+    day: WeekDay,
+    meal: MealTime,
+    foodIndex: number,
+    amount: number
   ) => void;
   onRemoveFood: (day: WeekDay, meal: MealTime, foodIndex: number) => void;
 }
@@ -46,9 +53,6 @@ function MealCellContent({
             return (
               <div key={foodIndex} className="weekly-cell-food-row">
                 <span className="weekly-cell-food-name">{food.foodName}</span>
-                {food.grams > 0 && (
-                  <span className="weekly-cell-grams">{food.grams}g</span>
-                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -138,8 +142,31 @@ export function PlanGrid({
   weekDays,
   mealTimes,
   onAddFood,
+  onUpdateAmount: _onUpdateAmount,
   onRemoveFood,
 }: PlanGridProps) {
+  const totalsByFood = (() => {
+    const map = new Map<number, { name: string; category: MealFood["category"]; total: number }>();
+
+    for (const day of weekDays) {
+      for (const meal of mealTimes) {
+        for (const f of plan[day][meal].foods) {
+          const amount = Number.isFinite(f.amount) ? f.amount : 0;
+          const existing = map.get(f.foodId);
+          if (existing) {
+            existing.total += amount;
+          } else {
+            map.set(f.foodId, { name: f.foodName, category: f.category, total: amount });
+          }
+        }
+      }
+    }
+
+    return Array.from(map.entries())
+      .map(([foodId, v]) => ({ foodId, ...v }))
+      .sort((a, b) => b.total - a.total);
+  })();
+
   return (
     <div className="weekly-main">
       <div className="weekly-table-wrapper">
@@ -168,7 +195,7 @@ export function PlanGrid({
                       day={day}
                       meal={meal}
                       foods={plan[day][meal].foods}
-                      onAddFood={(food) => onAddFood(day, meal, food, 0)}
+                      onAddFood={(food) => onAddFood(day, meal, food)}
                       onRemoveFood={(foodIndex) =>
                         onRemoveFood(day, meal, foodIndex)
                       }
@@ -179,6 +206,40 @@ export function PlanGrid({
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="weekly-goals">
+        <div className="weekly-goals__title">Food totals (g)</div>
+        <div className="weekly-goals__table-wrapper">
+          <table className="weekly-goals__table">
+            <thead>
+              <tr>
+                <th className="weekly-goals__th weekly-goals__th--food">Food</th>
+                <th className="weekly-goals__th weekly-goals__th--cat">Category</th>
+                <th className="weekly-goals__th weekly-goals__th--num">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {totalsByFood.length === 0 ? (
+                <tr>
+                  <td className="weekly-goals__td weekly-goals__td--empty" colSpan={3}>
+                    No foods in plan yet.
+                  </td>
+                </tr>
+              ) : (
+                totalsByFood.map((row) => (
+                  <tr key={row.foodId}>
+                    <td className="weekly-goals__td weekly-goals__td--food">{row.name}</td>
+                    <td className="weekly-goals__td weekly-goals__td--cat">{row.category}</td>
+                    <td className="weekly-goals__td weekly-goals__td--num">
+                      {row.total}g
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -3,13 +3,14 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { FoodList } from "./FoodList";
 import { PlanGrid } from "./PlanGrid";
-import type { FoodItem } from "./FoodDatabase";
+import type { FoodItem, FoodUnit } from "./FoodDatabase";
 
 export interface MealFood {
   foodId: number;
   foodName: string;
   category: "Carbs" | "Protein" | "Vegetables";
-  grams: number;
+  amount: number;
+  unit: FoodUnit;
 }
 
 export interface MealCell {
@@ -128,7 +129,8 @@ export function WeeklyPlan() {
     day: WeekDay,
     meal: MealTime,
     food: FoodItem,
-    grams: number = 0
+    amount: number = food.defaultAmount ?? 0,
+    unit: FoodUnit = food.defaultUnit ?? "g"
   ) => {
     if (food.category === "Soup") return;
 
@@ -141,7 +143,8 @@ export function WeeklyPlan() {
         foodId: food.id,
         foodName: food.name,
         category: food.category as "Carbs" | "Protein" | "Vegetables",
-        grams,
+        amount,
+        unit,
       };
       cell.foods = [...cell.foods, mealFood];
 
@@ -150,16 +153,16 @@ export function WeeklyPlan() {
     });
   };
 
-  const updateFoodGrams = (
+  const updateFoodAmount = (
     day: WeekDay,
     meal: MealTime,
     foodIndex: number,
-    grams: number
+    amount: number
   ) => {
     setPlan((prev) => {
       if (!prev) return prev;
       const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(prev));
-      newPlan[day][meal].foods[foodIndex].grams = grams;
+      newPlan[day][meal].foods[foodIndex].amount = amount;
       void persistPlan(newPlan);
       return newPlan;
     });
@@ -206,7 +209,7 @@ export function WeeklyPlan() {
           weekDays={WEEK_DAYS}
           mealTimes={MEAL_TIMES}
           onAddFood={addFoodToCell}
-          onUpdateGrams={updateFoodGrams}
+          onUpdateAmount={updateFoodAmount}
           onRemoveFood={removeFood}
         />
       </div>

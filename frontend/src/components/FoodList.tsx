@@ -41,60 +41,44 @@ export function FoodList({ foods, isCollapsed, onToggleSidebar }: FoodListProps)
       className={
         isCollapsed ? "weekly-sidebar weekly-sidebar--collapsed" : "weekly-sidebar"
       }
-      onClick={isCollapsed ? onToggleSidebar : undefined}
-      role={isCollapsed ? "button" : undefined}
-      tabIndex={isCollapsed ? 0 : undefined}
-      onKeyDown={
-        isCollapsed
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") onToggleSidebar();
-            }
-          : undefined
-      }
     >
-      <div className="weekly-sidebar-header">
-        {!isCollapsed && (
-          <div className="weekly-sidebar-header-main">
-            <h3 className="weekly-sidebar-title">Available Foods</h3>
-            <p className="weekly-sidebar-subtitle">
-              Drag to the table on the right
-            </p>
-          </div>
-        )}
-        <Button
-          size="sm"
-          variant="ghost"
-          className="weekly-sidebar-toggle"
-          onClick={onToggleSidebar}
-        >
-          {isCollapsed ? ">" : "<"}
-        </Button>
-      </div>
-
       {!isCollapsed && (
-        <div className="weekly-sidebar-body">
-          {categories.map((category) => {
-            const categoryFoods = foods.filter((f) => f.category === category);
+        <div className="weekly-sidebar-content">
+          <div className="weekly-sidebar-body">
+            {categories.map((category) => {
+              const categoryFoods = foods.filter((f) => f.category === category);
 
-            return (
-              <div key={category} className="weekly-sidebar-section">
-                <div className="weekly-sidebar-section-title">{category}</div>
-                <div className="weekly-sidebar-section-list">
-                  {categoryFoods.length > 0 ? (
-                    categoryFoods.map((food) => (
-                      <DraggableFood key={food.id} food={food} />
-                    ))
-                  ) : (
-                    <p className="weekly-sidebar-empty">
-                      No foods yet. Add some in the database first.
-                    </p>
-                  )}
+              return (
+                <div key={category} className="weekly-sidebar-section">
+                  <div className="weekly-sidebar-section-title">{category}</div>
+                  <div className="weekly-sidebar-section-list">
+                    {categoryFoods.length > 0 ? (
+                      categoryFoods.map((food) => (
+                        <DraggableFood key={food.id} food={food} />
+                      ))
+                    ) : (
+                      <p className="weekly-sidebar-empty">
+                        No foods yet. Add some in the database first.
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
+
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="weekly-sidebar-rail"
+        onClick={onToggleSidebar}
+        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        {isCollapsed ? ">" : "<"}
+      </Button>
     </div>
   );
 }
