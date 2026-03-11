@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { FoodList } from "./FoodList";
@@ -48,6 +48,7 @@ export function WeeklyPlan() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const pendingPlanRef = useRef<WeeklyPlanData | null>(null);
 
   const buildEmptyPlan = (): WeeklyPlanData => {
     const initialPlan: WeeklyPlanData = {} as WeeklyPlanData;
@@ -125,6 +126,23 @@ export function WeeklyPlan() {
     }
   };
 
+  const applyPlanUpdate = (updater: (current: WeeklyPlanData) => WeeklyPlanData) => {
+    setPlan((prev) => {
+      const current = prev ?? buildEmptyPlan();
+      const updated = updater(current);
+      pendingPlanRef.current = updated;
+      return updated;
+    });
+  };
+
+  useEffect(() => {
+    if (pendingPlanRef.current) {
+      void persistPlan(pendingPlanRef.current);
+      pendingPlanRef.current = null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan]);
+
   const addFoodToCell = (
     day: WeekDay,
     meal: MealTime,
@@ -132,8 +150,7 @@ export function WeeklyPlan() {
     amount: number = food.defaultAmount ?? 0,
     unit: FoodUnit = food.defaultUnit ?? "g"
   ) => {
-    setPlan((prev) => {
-      const current = prev ?? buildEmptyPlan();
+    applyPlanUpdate((current) => {
       const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(current));
       const cell = newPlan[day][meal];
 
@@ -146,7 +163,6 @@ export function WeeklyPlan() {
       };
       cell.foods = [...cell.foods, mealFood];
 
-      void persistPlan(newPlan);
       return newPlan;
     });
   };
@@ -157,23 +173,19 @@ export function WeeklyPlan() {
     foodIndex: number,
     amount: number
   ) => {
-    setPlan((prev) => {
-      if (!prev) return prev;
-      const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(prev));
+    applyPlanUpdate((current) => {
+      const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(current));
       newPlan[day][meal].foods[foodIndex].amount = amount;
-      void persistPlan(newPlan);
       return newPlan;
     });
   };
 
   const removeFood = (day: WeekDay, meal: MealTime, foodIndex: number) => {
-    setPlan((prev) => {
-      if (!prev) return prev;
-      const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(prev));
+    applyPlanUpdate((current) => {
+      const newPlan: WeeklyPlanData = JSON.parse(JSON.stringify(current));
       newPlan[day][meal].foods = newPlan[day][meal].foods.filter(
         (_, idx) => idx !== foodIndex
       );
-      void persistPlan(newPlan);
       return newPlan;
     });
   };

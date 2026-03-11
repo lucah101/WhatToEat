@@ -91,7 +91,10 @@ export function FoodDatabase() {
         body: JSON.stringify({
           name,
           category,
-          defaultAmount: Math.max(0, Math.trunc(newFoodDefaults[category].amount)),
+          defaultAmount: Math.max(
+            0,
+            Math.trunc(newFoodDefaults[category].amount)
+          ),
           defaultUnit: newFoodDefaults[category].unit,
           notes: newFoodNotes[category] ?? "",
         }),
@@ -100,6 +103,10 @@ export function FoodDatabase() {
       await fetchFoods();
       setNewFoodNames((prev) => ({ ...prev, [category]: "" }));
       setNewFoodNotes((prev) => ({ ...prev, [category]: "" }));
+      setNewFoodDefaults((prev) => ({
+        ...prev,
+        [category]: { ...prev[category], amount: 0 },
+      }));
     } finally {
       setSaving(false);
     }
@@ -231,6 +238,7 @@ export function FoodDatabase() {
                           <Input
                             value={editingName}
                             onChange={(e) => setEditingName(e.target.value)}
+                            className="food-table__add-name"
                             autoFocus
                             onKeyDown={(e) => {
                               if (e.key === "Enter") void saveEdit();
@@ -246,6 +254,7 @@ export function FoodDatabase() {
                           <div className="food-table__amount-editor">
                             <Input
                               value={String(editingDefaultAmount)}
+                              className="food-table__add-amount"
                               type="number"
                               min={0}
                               step={1}
@@ -277,7 +286,7 @@ export function FoodDatabase() {
                             value={editingNotes}
                             onChange={(e) => setEditingNotes(e.target.value)}
                             placeholder="Notes..."
-                            className="food-table__notes-input"
+                            className="food-table__notes-input food-table__add-notes"
                             onKeyDown={(e) => {
                               if (e.key === "Enter") void saveEdit();
                               if (e.key === "Escape") cancelEdit();
@@ -289,7 +298,7 @@ export function FoodDatabase() {
                       </td>
                       <td className="food-table__td food-table__td--actions">
                         {editingId === food.id ? (
-                          <div className="food-table__actions">
+                          <div className="food-table__actions food-table__actions--edit">
                             <Button
                               onClick={saveEdit}
                               size="sm"
@@ -308,7 +317,7 @@ export function FoodDatabase() {
                             </Button>
                           </div>
                         ) : (
-                          <div className="food-table__actions">
+                          <div className="food-table__actions food-table__actions--edit">
                             <Button
                               onClick={() => startEdit(food)}
                               size="sm"
@@ -352,9 +361,9 @@ export function FoodDatabase() {
                         />
                         <Input
                           value={String(newFoodDefaults[category].amount)}
-                        type="number"
-                        min={0}
-                        step={1}
+                          type="number"
+                          min={0}
+                          step={1}
                           inputMode="numeric"
                           className="food-table__add-amount"
                           onChange={(e) =>
@@ -362,9 +371,11 @@ export function FoodDatabase() {
                               ...prev,
                               [category]: {
                                 ...prev[category],
-                              amount: Number.isFinite(parseInt(e.target.value, 10))
-                                ? parseInt(e.target.value, 10)
-                                : 0,
+                                amount: Number.isFinite(
+                                  parseInt(e.target.value, 10)
+                                )
+                                  ? parseInt(e.target.value, 10)
+                                  : 0,
                               },
                             }))
                           }

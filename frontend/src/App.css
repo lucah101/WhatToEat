@@ -135,7 +135,7 @@ body {
 }
 
 .food-table__th--name {
-  width: 260px;
+  width: 180px;
 }
 
 .food-table__th--amount {
@@ -144,10 +144,11 @@ body {
 
 .food-table__th--notes {
   width: auto;
+  padding-left: 30px;
 }
 
 .food-table__th--actions {
-  width: 120px;
+  width: 180px;
 }
 
 .food-table__row:hover .food-table__td {
@@ -162,6 +163,7 @@ body {
 
 .food-table__td--actions {
   vertical-align: middle;
+  text-align: right;
 }
 
 .food-table__td--amount {
@@ -184,7 +186,11 @@ body {
 }
 
 .food-table__notes-input {
-  width: 100%;
+  width: 360px;
+}
+
+.food-table__td--notes .wt-input.food-table__notes-input {
+  margin-left: 12px;
 }
 
 .food-table__amount {
@@ -235,6 +241,11 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  justify-content: flex-end;
+}
+
+.food-table__actions--edit {
+  margin-right: 50px;
 }
 
 .food-table__name {
@@ -314,14 +325,23 @@ body {
   width: 180px;
 }
 
+.food-table__td--name .wt-input.food-table__add-name {
+  width: 180px;
+}
+
 .food-table__add .wt-input.food-table__add-amount {
   flex: 0 0 96px !important;
   width: 96px;
 }
 
+.food-table__td--amount .wt-input.food-table__add-amount {
+  flex: 0 0 96px !important;
+  width: 96px;
+}
+
 .food-table__add .wt-input.food-table__add-notes {
-  flex: 1 1 auto !important;
-  width: auto;
+  flex: 0 0 360px !important;
+  width: 360px;
   min-width: 0;
 }
 
@@ -504,6 +524,11 @@ body {
   background-color: #2563eb;
   color: #ffffff;
   box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
+}
+
+.food-table__add .add-button {
+  margin-left: auto;
+  margin-right: 50px;
 }
 
 .add-button:hover {
@@ -724,9 +749,9 @@ body {
 }
 
 .weekly-goals__table {
-  width: 100%;
   border-collapse: collapse;
-  min-width: 720px;
+  width: 500px;
+  margin: 0 auto;
 }
 
 .weekly-goals__th {
@@ -740,12 +765,14 @@ body {
 }
 
 .weekly-goals__th--food {
-  width: 100%;
+  width: 150px;
+  padding-right: 4px;
 }
 
 .weekly-goals__th--cat {
   white-space: nowrap;
-  width: 120px;
+  width: 80px;
+  padding-left: 4px;
 }
 
 .weekly-goals__th--num {
@@ -764,6 +791,7 @@ body {
   font-weight: 700;
   color: #111827;
   white-space: nowrap;
+  padding-left: 4px;
 }
 
 .weekly-goals__td--num {
@@ -780,6 +808,7 @@ body {
   font-weight: 600;
   color: #111827;
   max-width: 0;
+  padding-right: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -908,6 +937,65 @@ body {
 .weekly-cell-content {
   height: 100%;
   overflow-y: auto;
+  padding-left: 10px;
+}
+
+.weekly-cell-table {
+  width: 70%;
+  border-collapse: collapse;
+}
+
+.weekly-cell-table-name {
+  width: 50px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #111827;
+  padding-left: 14px;
+  padding-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weekly-cell-table-amount {
+  width: 50px;
+  text-align: center;
+  padding-left: 0;
+}
+
+.weekly-cell-amount-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 50px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.weekly-cell-amount-input-wrapper .icon-button {
+  margin-left: 15px;
+}
+
+.weekly-cell-amount-input {
+  flex: 0 0 64px;
+  width: 64px;
+  min-width: 0;
+  height: 26px;
+  padding-left: 0;
+  padding-right: 0;
+  border-radius: 0;
+  border-width: 0 0 1px 0;
+  border-style: solid;
+  border-color: #e5e7eb;
+  background-color: transparent;
+  box-shadow: none;
+  font-size: 12px;
+}
+
+.weekly-cell-amount-unit {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
 }
 
 .weekly-cell-group {

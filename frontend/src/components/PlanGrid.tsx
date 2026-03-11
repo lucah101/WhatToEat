@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useDrop } from "react-dnd";
 import { X } from "lucide-react";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import type { FoodItem, FoodUnit } from "./FoodDatabase";
 import type {
   WeekDay,
@@ -31,78 +32,65 @@ interface PlanGridProps {
 }
 
 function MealCellContent({
-  day: _day,
-  meal: _meal,
   foods,
   onRemoveFood,
+  onUpdateAmount,
 }: {
-  day: WeekDay;
-  meal: MealTime;
   foods: MealFood[];
   onRemoveFood: (foodIndex: number) => void;
+  onUpdateAmount: (foodIndex: number, amount: number) => void;
 }) {
-  const renderFoodGroup = (groupFoods: MealFood[], title: string) => {
-    if (groupFoods.length === 0) return null;
-
-    return (
-      <div className="weekly-cell-group">
-        <div className="weekly-cell-group-title">{title}</div>
-        <div className="weekly-cell-group-list">
-          {groupFoods.map((food) => {
-            const foodIndex = foods.indexOf(food);
-            return (
-              <div key={foodIndex} className="weekly-cell-food-row">
-                <span className="weekly-cell-food-name">{food.foodName}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onRemoveFood(foodIndex)}
-                  className="icon-button icon-button--muted"
-                >
-                  <X className="icon-button__icon" />
-                </Button>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="weekly-cell-content">
-      {renderFoodGroup(
-        foods.filter((f) => f.category === "Carbs"),
-        "Carbs"
-      )}
-      {renderFoodGroup(
-        foods.filter((f) => f.category === "Protein"),
-        "Protein"
-      )}
-      {renderFoodGroup(
-        foods.filter((f) => f.category === "Vegetables"),
-        "Vegetables"
-      )}
-      {renderFoodGroup(
-        foods.filter((f) => f.category === "Soup"),
-        "Soup"
-      )}
+      <table className="weekly-cell-table">
+        <tbody>
+          {foods.map((food, index) => (
+            <tr key={index}>
+              <td className="weekly-cell-table-name">{food.foodName}</td>
+              <td className="weekly-cell-table-amount">
+                <div className="weekly-cell-amount-input-wrapper">
+                  <Input
+                    type="number"
+                    min={0}
+                    step={1}
+                    inputMode="numeric"
+                    value={String(Number.isFinite(food.amount) ? food.amount : 0)}
+                    onChange={(e) => {
+                      const parsed = parseInt(e.target.value, 10);
+                      const safeAmount = Number.isFinite(parsed) ? parsed : 0;
+                      onUpdateAmount(index, safeAmount);
+                    }}
+                    className="weekly-cell-amount-input"
+                  />
+                  <span className="weekly-cell-amount-unit">g</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onRemoveFood(index)}
+                    className="icon-button icon-button--muted"
+                  >
+                    <X className="icon-button__icon" />
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
 function DroppableCell({
-  day,
-  meal,
   foods,
   onAddFood,
   onRemoveFood,
+  onUpdateFoodAmount,
 }: {
-  day: WeekDay;
-  meal: MealTime;
   foods: MealFood[];
   onAddFood: (food: FoodItem) => void;
   onRemoveFood: (foodIndex: number) => void;
+  onUpdateFoodAmount: (foodIndex: number, amount: number) => void;
 }) {
   const [{ isOver, canDrop }, drop] = useDrop(() => ({
     accept: "FOOD",
@@ -131,10 +119,9 @@ function DroppableCell({
         <div className="weekly-cell-empty">Drag food here</div>
       ) : (
         <MealCellContent
-          day={day}
-          meal={meal}
           foods={foods}
           onRemoveFood={onRemoveFood}
+          onUpdateAmount={onUpdateFoodAmount}
         />
       )}
     </div>
@@ -146,7 +133,7 @@ export function PlanGrid({
   weekDays,
   mealTimes,
   onAddFood,
-  onUpdateAmount: _onUpdateAmount,
+  onUpdateAmount,
   onRemoveFood,
 }: PlanGridProps) {
   const totalsByFood = (() => {
@@ -178,30 +165,31 @@ export function PlanGrid({
           <thead>
             <tr>
               <th className="weekly-table-meal-header">
-                <div>Meal</div>
+                <div>Day</div>
               </th>
-              {weekDays.map((day) => (
-                <th key={day} className="weekly-table-day-header">
-                  <div>{day}</div>
+              {mealTimes.map((meal) => (
+                <th key={meal} className="weekly-table-day-header">
+                  <div>{meal}</div>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {mealTimes.map((meal) => (
-              <tr key={meal}>
+            {weekDays.map((day) => (
+              <tr key={day}>
                 <td className="weekly-meal-row-header">
-                  <div>{meal}</div>
+                  <div>{day}</div>
                 </td>
-                {weekDays.map((day) => (
+                {mealTimes.map((meal) => (
                   <td key={`${day}-${meal}`} className="weekly-table-cell">
                     <DroppableCell
-                      day={day}
-                      meal={meal}
                       foods={plan[day][meal].foods}
                       onAddFood={(food) => onAddFood(day, meal, food)}
                       onRemoveFood={(foodIndex) =>
                         onRemoveFood(day, meal, foodIndex)
+                      }
+                      onUpdateFoodAmount={(foodIndex, amount) =>
+                        onUpdateAmount(day, meal, foodIndex, amount)
                       }
                     />
                   </td>
